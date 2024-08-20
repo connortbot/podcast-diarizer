@@ -65,3 +65,19 @@ I'll be using the pretrained speaker embedding model from `pyannote.audio`, `spe
 ## Clustering
 Used simple Agglomerative clustering on the embeddings. I want the pipeline to handle audio without being given the number of speakers - to use agglo, I need to provide a distance threshold. The first pass of these clusters is pretty inaccurate. Considering the segments themselves are already not guided by any supervision - the only way the transcript becomes somewhat accurate is with manual trial-and-error with the `distance_threshold`. (`1150` was more or less the most accurate for this simplistic pipeline with no supervision.)
 
+# Block 3: Refinement
+Just to get a working pipeline in, we'll have absolutely full supervision (which is obviously redundant) by using the transcript to influence the centroids of the clusters when we perform agglomerative. This means just reading from the `transcript.rttm` for segmentation, using the same model to create embeddings (while attaching speaker labels).
+
+During clustering, we:
+- Generate clusters without any supervision.
+- Using the labels and labeled embeddings, calculate the mean of each distinct cluster according to the labels.
+- For each unlabeled embedding, calculate the closest cluster and assign it to that cluster. It now has a set of refined labels.
+
+This ended up working relatively flawlessly, especially when compared to the base pipeline. Of course, this is expected due to the literal answer sheet handed to the model, and it still makes common diarization mistakes during overlapping speech. (Even if the words themselves aren't overlapped, because the specificity of segments is still limited by the original `whisper` segmentation).
+
+For example, the refined transcript has:
+```
+SPEAKER 8 0:01:23
+Hi, Ira Glass. Hi. We're trying to manipulate the radio playhouse listeners.
+```
+Where `SPEAKER 8` is Shirley Jihad. The second `Hi` is actually spoken by `Ira Glass`, or `SPEAKER 4`.
