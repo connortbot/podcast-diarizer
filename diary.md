@@ -1,7 +1,7 @@
 # Diarizer Diary
 
 # Initial Plan
-For dev projects with a deadline, I personally enjoy separating all my work into X blocks, and allocating the blocks to days.
+For dev projects with a deadline, I personally enjoy separating all my work into X blocks, and allocating the blocks to days. A working pipeline needs to be completed within 2 days/ 48 hours, so I'll be working on this mainly from late Aug 19th to late Aug 21st.
 
 ### Block 1: Setup
 - Dev env setup.
@@ -81,3 +81,67 @@ SPEAKER 8 0:01:23
 Hi, Ira Glass. Hi. We're trying to manipulate the radio playhouse listeners.
 ```
 Where `SPEAKER 8` is Shirley Jihad. The second `Hi` is actually spoken by `Ira Glass`, or `SPEAKER 4`.
+
+Additionally, the pipeline essentially ignores the agglomerative clustering. Its almost redundant.
+
+# Block 4: Metrics
+On Day 1.
+At this point in the process, there were other things I really wanted to work on that just was not time-efficient for my limit:
+- Smaller segments to reduce mistakes with multiple speakers in one segment (see Block 3 above).
+- Other methods of clustering such as K-Means or specifically [this paper](https://www.sciencedirect.com/science/article/abs/pii/S0885230821000619?via%3Dihub). This can change the amount of input we would require from a pipeline user, such as number of speakers as opposed to a large excerpt of a transcript (the former of which is much easier to provide for most filmmakers). Additionally, other ways of influencing clusters with labels besides centroids.
+- Increase overall speed - segmentation (~2.5m) is the most time-consuming aspect. Besides better hardware, I'd like to learn more about how...and possibly influencing segmentation by fine-tuning a model on the dataset.
+
+For this block, though, I should focus on semi-supervision, that is, only providing percentages of the complete transcript. `metrics.ipynb` will calculate DERs between the true `transcript.rttm` and the other transcripts I've generated at each iteration of the pipeline to see how it improves. I'll also start showing the relationships between DER,JER and amount of supervision.
+
+Allons-y:bangbang: :o
+
+Update:
+After working on it a bit more, I'm stupidly realizing that `refined-pipeline.ipynb`'s clustering section is super redundant - it literally overrides whatever work was done with Agglomerative and just assigns everything to the labels...
+
+I've run into a fundamental issue that seems to be withstanding in constrained clustering - whereby the added constraints fail to provide any improvements or, in some cases, even weaken the clustering. A good example is adding constraint matrices to `scikit-learn` `AgglomerativeClustering`, which weakens the clustering by introducing weaknesses of single linkage. 
+
+### agglo-cop
+My first pass was using an iteration of `AgglomerativeClustering` to set the centroids (via means) for a semi-supervised `COPKmeans` algorithm, whereby the labeled data is stacked onto the unlabeled and used to create must-link and cannot-link constraints.
+While this is the best hit at semi-supervision that I've found, it was simply worse the `base-pipeline`. The DER went from roughly `15%` to `17%`, indicating that the semi-supervision overly biased the latter clustering.
+
+I'll attempt another method, which is doing one pass of `AgglomerativeClustering` with a connectivity constraint matrix.
+
+### agglo-constrained
+No supervision: `17.70%`
+With supervision coeff (custom connectivity matrix):
+`0.05 -> 18.65%`
+`0.2 -> 18.72%`
+`0.4 -> 17.68%`
+`0.5 -> 17.68%`
+`0.6 -> 16.29%`
+`0.7 -> 16.31%`
+`0.8 -> 17.75%`
+Using `kneighbors_graph` with `n_neighbors = 30`:
+`0.1 -> 16.38%`
+`0.2 -> 16.35%`
+`0.4 -> 17.07%`
+`0.6 ->  16.38%`
+Using both methods in tandem:
+`0.1 -> 16.38%`
+`0.2 -> 16.35%`
+`0.4 -> 16.30%`
+`0.5 -> 17.77%`
+`0.6 ->  16.38%`
+
+
+There are other options that I'd love to compare and contrast once I have the time:
+- Cross validation, Bayesian (mentioned earlier)
+- Models like GMMs or HMMs ([example](https://github.com/cr7anand/semi-speaker-diarization))
+
+I was hoping that I'd have the time to explore other methods, especially neural-network based ones, that would reduce DER more with supervision. But, for now, I'll have to settle for this pipline's relatively accuracy (although 16% is still quite high...)
+
+
+# Block 5: Write, Write, Write
+At this point, I spent way too long on Block 4 - I think to get noticeably better results with the supervision I would need to spend some more time researching and implementing a specific method (e.g Bayesian HMM, as mentioned earlier). In which case, I should build the pipeline to be modular enough that I can switch out the clustering method at will.
+
+Since Block 4 took so long, going to spend a little more time adapting everything into useable `PDPipeline` + any other needed classes. Will consolidate this diary writeup into `future_work.md`, `summary.md`, `results.md`. Finally, use the finished pipeline to make all output examples, with their respective transcripts labeled with their DER/JER metrics.
+
+### Metrics
+For the writeup, I'll include the following figures:
+- DER/JER with respect to percentage of labeled segments provided
+- DER/JER across each pipeline iteration, e.g COPKmeans vs KNeighbors+Agglomerative
