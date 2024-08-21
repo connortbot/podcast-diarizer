@@ -144,4 +144,5 @@ Since Block 4 took so long, going to spend a little more time adapting everythin
 ### Metrics
 For the writeup, I'll include the following figures:
 - DER/JER with respect to percentage of labeled segments provided
-- DER/JER across each pipeline iteration, e.g COPKmeans vs KNeighbors+Agglomerative
+- DER/JER across each pipeline iteration, e.g COPKmeans vs KNeighbors+Agglomerative- DER/JER across each pipeline iteration, e.g COPKmeans vs KNeighbors+Agglomerative
+- Performance on VoxConversev0.3 compared to pyannote/speaker-diarization
