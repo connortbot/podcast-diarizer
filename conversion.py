@@ -4,11 +4,11 @@ import shutil
 import re
 
 
-def json_to_rttm(json_path):
+def json_to_rttm(json_path, output_path):
     with open(json_path, 'r') as f:
         data = json.load(f)
 
-    with open('notebooks/transcript.rttm', 'w') as f_o:
+    with open(output_path, 'w') as f_o:
         for segment in data['ep-11']:
             start = segment['utterance_start']
             duration = segment['duration']

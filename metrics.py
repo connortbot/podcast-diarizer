@@ -22,7 +22,7 @@ class DiarizationReference():
 
     # For a list of hypothesis RTTM files, calculate metrics for each and return
     # similarly indexed array.
-    def calculate_der(self, hypotheses_rttms, type):
+    def calculate_metrics(self, hypotheses_rttms, type):
         if type == 'der':
             metric = DiarizationErrorRate()
         elif type == 'jer':
