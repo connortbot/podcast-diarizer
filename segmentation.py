@@ -1,5 +1,4 @@
 import whisper
-import torch
 
 class Segmenting:
     def __init__(self):
