@@ -92,7 +92,7 @@ This first idea, `agglo-cop`, was spawned since `COPKmeans` is a standard exampl
 Between the three options to choose centroids (randomized, `kmeans++`, and agglomerative mean centroids), setting the initial centroids via a first pass of `AgglomerativeClustering` had a higher accuracy.
 
 ![](/images/randomvsagglo.png)
-
+*Agglomerative mean centroids exhibited clusters close to the diagonal with more defined blocks in comparison to randomized centroids.*
 
 ### `agglo-cop`
 The first of the two, `agglo-cop` uses a two-pass iteration of `AgglomerativeClustering` to set the centroids (via means) for the second phase; a semi-supervised `COPKmeans` algorithm, whereby the labeled data created must and cannot-link constraints.
@@ -152,6 +152,7 @@ Throughout various tests on the american life podcast, the `agglo-constrained` m
 
 ![](/images/coptoagglo_heatmap.png)
 
-While the heatmap is undoubtedly a reduction of the high dimensionality (and resulting variance), it's interesting that it appears that the `COPKmeans` results were clustering 'better'.
+Under the heatmap's interpretation, KMeans exhibited more defined clusters somewhat conforming to the diagonal. In contrast, the agglomerative clustering is sporadic and weak...this is a soft contradiction to the `DER` findings!
+While the heatmap is undoubtedly a reduction of the detail from high dimensionality (and resulting variance), it's interesting that it appears that the `COPKmeans` results were clustering 'better'.
 
 As such, the implementation of `clustering.py` still contains `agglo-cop`, for a hopeful future improvement...
