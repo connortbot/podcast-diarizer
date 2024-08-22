@@ -18,7 +18,7 @@ def json_to_rttm(json_path, output_path):
 
 def mp3_to_wav(mp3_path, output_path):
     if shutil.which("ffmpeg") is not None:
-        subprocess.call(['ffmpeg', '-i', mp3_path, '-ac', '1', output_path, '-y'], stdout=subprocess.DEVNULL)
+        subprocess.call(['ffmpeg', '-i', mp3_path, '-ac', '1', output_path, '-y'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     else:
         print("ffmpeg is not installed or not found in the system's PATH.")
 
