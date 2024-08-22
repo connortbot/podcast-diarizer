@@ -50,7 +50,7 @@ class Pipeline():
         f.close()  
 
     def run(self):
-        self._print_progress(f"Initializing pipeline for {audio_path}.")
+        self._print_progress(f"Initializing pipeline for {self.audio_path}.")
         """
             Phase 1: Conversion
         """
