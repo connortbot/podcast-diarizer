@@ -116,7 +116,6 @@ class Pipeline():
             label_to_speaker_name = {v: k for k, v in speaker_name_to_label.items()}
             true_labels_int = np.array([speaker_name_to_label[name] for name in true_labels]) # integer labels
 
-            combined_embeddings = np.vstack((labeled_embeddings, unlabeled_embeddings))
             clustering_model = ConstrainedAgglomerative(
                 n_clusters=self.n_speakers,
                 labeled_embeddings=labeled_embeddings,
