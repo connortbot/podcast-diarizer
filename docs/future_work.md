@@ -18,3 +18,6 @@ An entirely different way to approach the problem - there are many prebuild pipe
 In the future, I would explore data-driven approaches to automatically determine critical parameters such as `n_neighbors` in `kneighbors_graph` or the `distance_threshold` in agglomerative clustering. These parameters are crucial for the success of the clustering process, but they currently require manual tuning, which can be impractical. (This would also remove the user requirement of knowing the amount of speakers!)
 
 There are endless papers on data-driven methods. For instance, local density estimation or silhouette analysis (both proving very, very unhelpful during the task but could be improved).
+
+## Other datasets
+Although I was briefly able to compare with some other datasets, I did not get around to analyzing large datasets with varying types of conversation (i.e movie dialogue, podcasts versus loud/quiet, chaotic sequences).
