@@ -146,3 +146,6 @@ For the writeup, I'll include the following figures:
 - DER/JER with respect to percentage of labeled segments provided
 - DER/JER across each pipeline iteration, e.g COPKmeans vs KNeighbors+Agglomerative
 - Performance on VoxConversev0.3 compared to pyannote/speaker-diarization
+
+## Update post pipeline
+Although the initial task was to create a pipeline that took in an audio file and N segments, it was much more compact and useful for analysis to instead build a pipeline taking in the true transcription and audio file. This is a little more intuitive, as then the segmentation is done with one `Segmenting` object, rather than externally to and internally to the pipeline.
