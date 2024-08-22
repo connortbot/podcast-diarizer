@@ -56,10 +56,10 @@ An important choice is between setting a `distance_threshold` versus requiring k
 
 The alternative is using some data-driven method to calculate a `distance_threshold`. Unfortunately, some initial methods such as average distance between unsupervised clustering centroids, or local density thresholds proved very ineffective in adapting to different audio files, especially `11.mp3`. 
 
-So what do we value more - adaptability or ease of use? And in this case, the former allows the pipeline to easily mimic accuracy across different audios. While I would've loved to explore some other threshold calculation methods, many of them struggle for different distributions. (*Would normalization help...?*) A set amount of clusters definitively sets a baseline level of accuracy even before supervision.
+So what do we value more - adaptability or ease of use? In this case, the former allows the pipeline to easily maintain accuracy across different audios. While I would've loved to explore some other threshold calculation methods, many of them struggle for different distributions. (*Would normalization help...?*) A set amount of clusters definitively sets a baseline level of accuracy even before supervision.
 
 # Supervision in Clustering
-This section covers the various approaches to clustering audio embeddings.
+This section covers the various approaches to clustering audio embeddings with supervision.
 
 ![all_embeddings](/images/11_embeddings.png)
 
@@ -87,22 +87,27 @@ Additionally, the pipeline essentially ignores the agglomerative clustering. Its
 ## Agglomerative Centroids
 As the task goal was to introduce semi-supervision, and the accuracy of agglomerative was already relatively impressive, my first iteration used it to set the centroids of a `Kmeans` model.
 
-This first idea, `agglo-cop`, was spawned since `COPKmeans` is a standard example of a semi-supervised clustering algorithm. Unfortunately, any iteration of `Kmeans` is extremely dependent on the accuracy of the initial centroids. A random initialization could yield scary results:
+This first idea, `agglo-cop`, was spawned since `COPKmeans` is a standard example of a semi-supervised clustering algorithm. Unfortunately, any iteration of `Kmeans` is extremely dependent on the accuracy of the initial centroids.
+
+Between the three options to choose centroids (randomized, `kmeans++`, and agglomerative mean centroids), setting the initial centroids via a first pass of `AgglomerativeClustering` had a higher accuracy.
+
+![](/images/randomvsagglo.png)
 
 
 ### `agglo-cop`
-The first of the two, `agglo-cop` also uses a two-pass iteration of `AgglomerativeClustering` to set the centroids (via means) for the second phase; a semi-supervised `COPKmeans` algorithm, whereby the labeled data created must and cannot-link constraints.
+The first of the two, `agglo-cop` uses a two-pass iteration of `AgglomerativeClustering` to set the centroids (via means) for the second phase; a semi-supervised `COPKmeans` algorithm, whereby the labeled data created must and cannot-link constraints.
 
-My first attempt was just to set the centroids randomly. Then, I used the means of the clusters from agglomerative to generate the centroids. As shown below, the results were nearly identical (marginal difference in DER):
+Above, I showed how the clustering of the agglomerative centroid method had a higher accuracy. However, the seemingly little change *results* exposed a larger problem.
+As shown below, the results were nearly identical (marginal difference in DER):
 
 <p float="left">
   <img src="/images/11_random_cop.png" width="400" />
   <img src="/images/11_agglo_cop.png" width="400" /> 
 </p>
 
-*20% supervision, `11.mp3`*
+*20% supervision, `11.mp3`, lack of difference possibly an artifact of PCA reduction.*
 
-Furthermore, the `DER` as a result of these clusters was *higher*.
+Furthermore, the `DER` as a result of these clusters was *higher* than baseline.
 This raised two implications:
 1. The constraints applied by the labeled data forced the clustering regardless of the initial centroids, resulting in the nearly identical clusters. 
 2. In general, the COPKmeans algorithm (if implemented correctly) was too heavily biased to the constraints, resulting in lower accuracy.
@@ -113,7 +118,7 @@ My main takeaway was either that my implementation was heavily flawed, or that I
 ### `agglo-constrained`
 My second attempt resulted in the current pipeline's clustering method. I returned to the base pipeline's agglomerative clustering, but aimed to make it semi-supervised by providing the connectivity constraints. The goal of this iteration was to see if we could achieve semi-supervision WITHOUT an increase in `DER`.
 
-I observed that zero supervision agglomerative had a `DER` of `17.70%`. Thus, we aimed to find a method that reduced it with supervision.
+I observed that zero supervision agglomerative had a `DER` of `17.70%`. Thus, we aim to find a method that reduces it with supervision.
 
 The first pass was a custom connectivity matrix, which only improved at unreasonably high supervision coefficients:
 ```
@@ -150,26 +155,3 @@ Throughout various tests on the american life podcast, the `agglo-constrained` m
 While the heatmap is undoubtedly a reduction of the high dimensionality (and resulting variance), it's interesting that it appears that the `COPKmeans` results were clustering 'better'.
 
 As such, the implementation of `clustering.py` still contains `agglo-cop`, for a hopeful future improvement...
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
