@@ -134,8 +134,8 @@ class Pipeline():
             diarization_ref = DiarizationReference(rttm_path)
             output_rttms.append(rttm_output_name)
             self._print_progress(f"Generated RTTM ({rttm_output_name}).")
-        der_scores = diarization_ref.calculate_metric(output_rttms, 'der')
-        jer_scores = diarization_ref.calculate_metric(output_rttms, 'jer')
+        der_scores = diarization_ref.calculate_metrics(output_rttms, 'der')
+        jer_scores = diarization_ref.calculate_metrics(output_rttms, 'jer')
         self.metrics = (der_scores, jer_scores)
         self._print_progress(f"Calculated DER/JER metrics: {self.metrics}")
 
